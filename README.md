@@ -1,2 +1,0 @@
-# Seesun
-Seesun Android
