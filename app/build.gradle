@@ -46,4 +46,5 @@ dependencies {
 //    implementation project(':opencv')
 //    implementation 'com.rmtheis:tess-two:9.0.0'
     implementation 'com.android.support:design:27.1.1'
+    implementation 'com.squareup.okhttp3:okhttp:3.8.1'
 }
