@@ -19,6 +19,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
+    //카메라
     private File file; //캡처한 이미지
     private static CameraPreview surfaceView;
     private SurfaceHolder holder;
@@ -28,6 +29,9 @@ public class MainActivity extends AppCompatActivity {
     private Camera.PictureCallback myPictureCallback_JPG;
     private Camera.PictureCallback myPictureCallback_RAW;
     private Camera.ShutterCallback myShutterCallback;
+
+    //테서랙트
+//    TessBaseAPI tessBaseAPI;//tesseract 관련 클래스 객체
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
