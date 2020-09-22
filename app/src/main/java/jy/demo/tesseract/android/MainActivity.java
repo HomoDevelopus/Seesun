@@ -14,6 +14,9 @@ import android.os.Bundle;
 import android.view.SurfaceHolder;
 import android.view.Window;
 import android.view.WindowManager;
+
+import com.googlecode.tesseract.android.TessBaseAPI;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -31,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     private Camera.ShutterCallback myShutterCallback;
 
     //테서랙트
-//    TessBaseAPI tessBaseAPI;//tesseract 관련 클래스 객체
+    TessBaseAPI tessBaseAPI;//tesseract 관련 클래스 객체
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
