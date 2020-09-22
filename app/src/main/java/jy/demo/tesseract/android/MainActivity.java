@@ -1,22 +1,31 @@
 package jy.demo.tesseract.android;
 
 import android.Manifest;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera;
+import android.media.AudioManager;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
+import android.provider.MediaStore;
+import android.speech.tts.TextToSpeech;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import com.googlecode.tesseract.android.TessBaseAPI;
 
@@ -35,9 +44,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Locale;
+import android.view.ViewGroup.LayoutParams;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
 
     private File file; //캡처한 이미지
     private static CameraPreview surfaceView;
@@ -53,10 +64,19 @@ public class MainActivity extends AppCompatActivity {
 
     private TessBaseAPI tessBaseAPI;//tesseract 관련 클래스 객체
 
+    private TextToSpeech tts;
+
+    AudioManager aManager;
+    SharedPreferences sharedPreferences;
+    SharedPreferences.Editor editor;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        aManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+
         fu = new FileUploadUtils();
+        tts = new TextToSpeech(this, this);
 
         // 카메라 프리뷰를  전체화면으로 보여주기 위해 셋팅한다.
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -68,10 +88,12 @@ public class MainActivity extends AppCompatActivity {
 
         myShutterCallback = new Camera.ShutterCallback(){
             @Override
-            public void onShutter() {}};
+            public void onShutter() {
+            }};
         myPictureCallback_RAW = new Camera.PictureCallback(){
             @Override
-            public void onPictureTaken(byte[] arg0, Camera arg1) {}};
+            public void onPictureTaken(byte[] arg0, Camera arg1) {
+            }};
         myPictureCallback_JPG = new Camera.PictureCallback(){
             @Override
             public void onPictureTaken(byte[] arg0, Camera arg1) {
@@ -135,8 +157,44 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }).start();
-    }
 
+        LinearLayout layout = findViewById(R.id.background);
+        layout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mCamera.autoFocus(new Camera.AutoFocusCallback() {
+                    @Override
+                    public void onAutoFocus(boolean b, Camera camera) {
+
+                    }
+                });
+            }
+        });
+
+        //mute 요청
+        int cameraId = -1;
+        int numberOfCameras = Camera.getNumberOfCameras();
+        for (int i = 0; i < numberOfCameras; i++) {
+            Camera.CameraInfo info = new Camera.CameraInfo();
+            Camera.getCameraInfo(i, info);
+            System.out.println("info.canDisableShutterSound:"+info.canDisableShutterSound);
+            if (info.canDisableShutterSound) {
+                mCamera.enableShutterSound(false);
+            }
+        }
+
+        // Change the stream to your stream of choice.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            System.out.println("뮤트 in");
+            aManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_MUTE, 0);
+            aManager.adjustStreamVolume(AudioManager.STREAM_NOTIFICATION, AudioManager.ADJUST_MUTE, 0);
+            aManager.adjustStreamVolume(AudioManager.STREAM_ALARM, AudioManager.ADJUST_MUTE, 0);
+            aManager.adjustStreamVolume(AudioManager.STREAM_RING, AudioManager.ADJUST_MUTE, 0);
+            aManager.adjustStreamVolume(AudioManager.STREAM_SYSTEM, AudioManager.ADJUST_MUTE, 0);
+        } else {
+            aManager.setStreamMute(AudioManager.STREAM_MUSIC, true);
+        }
+    }
 
     public void dataProcessing(ArrayList<JSONObject> detectedObjs) throws JSONException {
         Log.d("<dataprocessing 함수 호출>", "json 데이터 처리");
@@ -153,6 +211,7 @@ public class MainActivity extends AppCompatActivity {
                 location[j] = Float.parseFloat(tmp.substring(1,tmp.length()-1).split(",")[j]);
             }
 
+            //이미지 뷰에 띄우기
             Bitmap myBitmap = BitmapFactory.decodeFile(file.getAbsolutePath()); // 비트맵 생성
             OpenCVLoader.initDebug(); // 이 코드를 선언해주지않으면 컴파일 에러 발생
             Mat img =new Mat();
@@ -167,8 +226,14 @@ public class MainActivity extends AppCompatActivity {
             Utils.matToBitmap(img, resultBitmap); // Mat을 비트맵으로 변환
 
             imageView.setImageBitmap(resultBitmap); // 이미지 뷰에 비트맵 출력
-        }
 
+            //tts 음성 안내
+            float MINACC = 50;
+            if(accuracy >= MINACC){
+                CharSequence obj = object;
+                speakOut(obj);
+            }
+        }
     }
 
     public static Camera getCamera(){
@@ -222,7 +287,40 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
     }
+
     static {
         System.loadLibrary("opencv_java4");
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void speakOut(CharSequence text){
+        tts.setPitch((float) 0.6);
+//        tts.setSpeechRate((float)0.1);
+        tts.speak(text, TextToSpeech.QUEUE_FLUSH,null,"id1");
+    }
+    @Override
+    public void onDestroy() {
+        if (tts != null)  {
+            tts.stop();
+            tts.shutdown();
+        }
+        super.onDestroy();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @Override
+    public void onInit(int status) {
+        if (status == TextToSpeech.SUCCESS)  {
+            int result = tts.setLanguage(Locale.ENGLISH);
+//            int result = tts.setLanguage(Locale.KOREA);
+
+            if (result == TextToSpeech.LANG_MISSING_DATA
+                    || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                Log.e("TTS", "This Language is not supported");
+            }
+
+        } else {
+            Log.e("TTS", "Initilization Failed!");
+        }
     }
 }
