@@ -41,14 +41,17 @@ public class FileUploadUtils {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 detectedObjs = new ArrayList<>();
-//                Log.d("GET :: ", response.body().string());
                 try {
-                    JSONObject jsonObject = new JSONObject(response.body().string());
+                    String content = response.body().string();
+                    Log.d("GET: ", content);
+                    if(content == null){return;}
+                    if(content.contains("<!doctype html5>")){return;}
+                    JSONObject jsonObject = new JSONObject(content);
                     JSONArray jsonArray = jsonObject.getJSONArray("obj");
 //                    JSONArray jsonArray = new JSONArray(response.body().string());
                     for (int i=0;i<jsonArray.length();i++){
                         JSONObject jsonObject2 = jsonArray.getJSONObject(i);
-                        Log.d("jsonObject2 :: ", String.valueOf(jsonObject2));
+                        Log.d("detected info", String.valueOf(jsonObject2));
                         detectedObjs.add(jsonObject2);
                     }
                 } catch (JSONException e) {

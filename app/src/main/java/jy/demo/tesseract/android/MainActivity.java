@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -37,7 +38,7 @@ import java.util.ArrayList;
 
 
 public class MainActivity extends AppCompatActivity {
-    //카메라
+
     private File file; //캡처한 이미지
     private static CameraPreview surfaceView;
     private SurfaceHolder holder;
@@ -47,11 +48,10 @@ public class MainActivity extends AppCompatActivity {
     private Camera.PictureCallback myPictureCallback_JPG;
     private Camera.PictureCallback myPictureCallback_RAW;
     private Camera.ShutterCallback myShutterCallback;
+    private FileUploadUtils fu; //파일전송/수신 클래스
+    private ArrayList<JSONObject> detectedObjs;//json data 배열
 
-    //테서랙트
     private TessBaseAPI tessBaseAPI;//tesseract 관련 클래스 객체
-    private FileUploadUtils fu;
-    private ArrayList<JSONObject> detectedObjs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,9 +116,20 @@ public class MainActivity extends AppCompatActivity {
                         Thread.sleep(1000);//1초 간격으로 사진 촬영
                         mCamera.takePicture(myShutterCallback,
                                 myPictureCallback_RAW, myPictureCallback_JPG);
-                        Thread.sleep(500);
-                        dataProcessing(fu.send2Server(file));//response 호출될 때만
-                    } catch (InterruptedException | JSONException e) {
+                        Thread.sleep(100);
+                        detectedObjs = fu.send2Server(file);
+
+                        runOnUiThread(new Runnable() {//UI 변경
+                            @Override
+                            public void run() {
+                                try {
+                                    dataProcessing(detectedObjs);
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+                    } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
@@ -126,8 +137,10 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
+
     public void dataProcessing(ArrayList<JSONObject> detectedObjs) throws JSONException {
         Log.d("<dataprocessing 함수 호출>", "json 데이터 처리");
+        ImageView imageView = (ImageView)findViewById(R.id.image_result);
         if(detectedObjs == null){
             return;
         }
@@ -136,8 +149,6 @@ public class MainActivity extends AppCompatActivity {
             float accuracy = Float.parseFloat(detectedObjs.get(i).get("accuracy").toString());
             float[] location = new float[4];
             String tmp = detectedObjs.get(i).get("location").toString();
-            tmp = tmp.substring(1,tmp.length()-1);
-//            System.out.println("tmp:"+tmp);
             for(int j = 0; j < 4 ; j++){
                 location[j] = Float.parseFloat(tmp.substring(1,tmp.length()-1).split(",")[j]);
             }
@@ -146,14 +157,15 @@ public class MainActivity extends AppCompatActivity {
             OpenCVLoader.initDebug(); // 이 코드를 선언해주지않으면 컴파일 에러 발생
             Mat img =new Mat();
             Utils.bitmapToMat(myBitmap ,img); // 비트맵을 Mat으로 변환
+
             //Draw rectangle
             //Parameters: mat object for drawing, point coordinates (x1,y1,x2,y2) and color BGR
-            Imgproc.rectangle(img, new Point(location[0],location[1]), new Point(location[3],location[4]), new Scalar(255, 0, 0, 255), 3);
+            System.out.println("좌표:"+location[0]+"/"+location[1]+"/"+location[2]+"/"+location[3]);
+            Imgproc.rectangle(img, new Point(location[0],location[1]), new Point(location[2],location[3]), new Scalar(255, 0, 0, 255), 3);
 
-            Bitmap resultBitmap = Bitmap.createBitmap(img.cols(),  img.rows(),Bitmap.Config.ARGB_8888);;
+            Bitmap resultBitmap = Bitmap.createBitmap(img.cols(), img.rows(),Bitmap.Config.ARGB_8888);;
             Utils.matToBitmap(img, resultBitmap); // Mat을 비트맵으로 변환
 
-            ImageView imageView = (ImageView)findViewById(R.id.image_result);
             imageView.setImageBitmap(resultBitmap); // 이미지 뷰에 비트맵 출력
         }
 
