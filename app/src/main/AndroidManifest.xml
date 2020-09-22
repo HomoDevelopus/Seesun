@@ -4,6 +4,7 @@
 
     <!-- 앱에서 필요한 모든 퍼미션은 매니페스트 파일에 선언해야 합니다.
     안드로이드 6.0 이상에서는 실행 중에 퍼미션을 요청합니다.           -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" android:required="true"/>
