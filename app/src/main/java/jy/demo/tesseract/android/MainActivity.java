@@ -1,127 +1,158 @@
 package jy.demo.tesseract.android;
 
-import android.content.Intent;
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
-import android.media.ExifInterface;
-import android.net.Uri;
+import android.hardware.Camera;
+import android.os.Build;
 import android.os.Environment;
-import android.provider.MediaStore;
-import android.support.v4.content.FileProvider;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
-
+import android.view.SurfaceHolder;
+import android.view.Window;
+import android.view.WindowManager;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
-
-    private static final int REQUEST_IMAGE_CAPTURE = 672;
-    private String imageFilePath;
-    private Uri photoUri;
-    private Button btnImageSend;
-    private File image;//임시 저장 이미지
+    private File file; //캡처한 이미지
+    private static CameraPreview surfaceView;
+    private SurfaceHolder holder;
+    private static Camera mCamera;
+    private int RESULT_PERMISSIONS = 100;
+    public static MainActivity getInstance;
+    private Camera.PictureCallback myPictureCallback_JPG;
+    private Camera.PictureCallback myPictureCallback_RAW;
+    private Camera.ShutterCallback myShutterCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
-        findViewById(R.id.take).setOnClickListener(new View.OnClickListener() {
+        // 카메라 프리뷰를  전체화면으로 보여주기 위해 셋팅한다.
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        // 안드로이드 6.0 이상 버전에서는 CAMERA 권한 허가를 요청한다.
+        requestPermissionCamera();
+
+        myShutterCallback = new Camera.ShutterCallback(){
             @Override
-            public void onClick(View v) {
-                sendTakePhotoIntent();
-                FileUploadUtils.send2Server(image);
-            }
-        });
+            public void onShutter() {}};
+        myPictureCallback_RAW = new Camera.PictureCallback(){
+            @Override
+            public void onPictureTaken(byte[] arg0, Camera arg1) {}};
+        myPictureCallback_JPG = new Camera.PictureCallback(){
+            @Override
+            public void onPictureTaken(byte[] arg0, Camera arg1) {
+                if (arg0 != null) {
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(arg0 , 0, arg0 .length);
+                    if(bitmap!=null){
+                        file = new File(Environment.getExternalStorageDirectory()+"/dirr");
+                        if(!file.isDirectory()){
+                            file.mkdir();
+                        }
+                        file = new File(Environment.getExternalStorageDirectory()+"/dirr","CAPTURE.jpg");
+                        try
+                        {
+                            FileOutputStream fileOutputStream=new FileOutputStream(file);
+                            bitmap.compress(Bitmap.CompressFormat.JPEG,100, fileOutputStream);
 
-        btnImageSend = findViewById(R.id.btnImageSend);
-        btnImageSend.setEnabled(false);
-        btnImageSend.setOnClickListener(new View.OnClickListener(){
-            @Override public void onClick(View view){
-                FileUploadUtils.send2Server(image);
+                            fileOutputStream.flush();
+                            fileOutputStream.close();
+
+//                            Toast.makeText(MainActivity.this, // 저장 테스트
+//                                    "Image saved: " + file.toString(),
+//                                    Toast.LENGTH_LONG).show();
+                        }
+                        catch(IOException e){
+                            e.printStackTrace();
+                        }
+                        catch(Exception exception)
+                        {
+                            exception.printStackTrace();
+                        }
+
+                    }
+                }
             }
-        });
+        };
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(true) {
+                    try {
+                        Thread.sleep(1000);
+                        mCamera.takePicture(myShutterCallback,
+                                myPictureCallback_RAW, myPictureCallback_JPG);
+                        Thread.sleep(500);
+                        FileUploadUtils.send2Server(file);
+
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
     }
+
+    public static Camera getCamera(){
+        return mCamera;
+    }
+    private void setInit(){
+        getInstance = this;
+        // 카메라 객체를 R.layout.activity_main의 레이아웃에 선언한 SurfaceView에서 먼저 정의해야 함으로 setContentView 보다 먼저 정의한다.
+        mCamera = Camera.open();
+        setContentView(R.layout.activity_main);
+        // SurfaceView를 상속받은 레이아웃을 정의한다.
+        surfaceView = (CameraPreview) findViewById(R.id.preview);
+        // SurfaceView 정의 - holder와 Callback을 정의한다.
+        holder = surfaceView.getHolder();
+        holder.addCallback(surfaceView);
+        holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+    }
+
+    public boolean requestPermissionCamera(){
+        int sdkVersion = Build.VERSION.SDK_INT;
+        if(sdkVersion >= Build.VERSION_CODES.M) {
+
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+
+                ActivityCompat.requestPermissions(MainActivity.this,
+                        new String[]{Manifest.permission.CAMERA},
+                        RESULT_PERMISSIONS);
+            }else {
+                setInit();
+            }
+        }else{  // version 6 이하일때
+            setInit();
+            return true;
+        }
+        return true;
+    }
+
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            Bitmap bitmap = BitmapFactory.decodeFile(imageFilePath);
-            ExifInterface exif = null;
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
 
-            try {
-                exif = new ExifInterface(imageFilePath);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        if (RESULT_PERMISSIONS == requestCode) {
 
-            int exifOrientation;
-            int exifDegree;
-
-            if (exif != null) {
-                exifOrientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-                exifDegree = exifOrientationToDegrees(exifOrientation);
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // 권한 허가시
+                setInit();
             } else {
-                exifDegree = 0;
+                // 권한 거부시
             }
-
-            ((ImageView)findViewById(R.id.photo)).setImageBitmap(rotate(bitmap, exifDegree));
+            return;
         }
-    }
 
-    private int exifOrientationToDegrees(int exifOrientation) {
-        if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90) {
-            return 90;
-        } else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_180) {
-            return 180;
-        } else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_270) {
-            return 270;
-        }
-        return 0;
-    }
-
-    private Bitmap rotate(Bitmap bitmap, float degree) {
-        Matrix matrix = new Matrix();
-        matrix.postRotate(degree);
-        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-    }
-
-
-    private void sendTakePhotoIntent() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            File photoFile = null;
-            try {
-                photoFile = createImageFile();
-            } catch (IOException ex) {
-                // Error occurred while creating the File
-            }
-
-            if (photoFile != null) {
-                photoUri = FileProvider.getUriForFile(this, getPackageName(), photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
-                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-            }
-        }
-    }
-
-    private File createImageFile() throws IOException {
-//        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "CAPTURE";
-        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        image = File.createTempFile(
-                imageFileName,      /* prefix */
-                ".jpg",         /* suffix */
-                storageDir          /* directory */
-        );
-        imageFilePath = image.getAbsolutePath();
-        return image;
     }
 }

@@ -2,6 +2,9 @@ package jy.demo.tesseract.android;
 
 import android.util.Log;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -21,7 +24,7 @@ public class FileUploadUtils {
                 .addFormDataPart("file",file.getName(),RequestBody.create(MultipartBody.FORM,file))
                 .build();
         Request request = new Request.Builder()
-        .url("http://c41afd1e67a9.ngrok.io/file_upload")
+        .url("http://fa5d348f7e0f.ngrok.io/file_upload")
         .post(requestBody).build();
 
         OkHttpClient client = new OkHttpClient();
@@ -33,7 +36,13 @@ public class FileUploadUtils {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                Log.d("TEST : ",response.body().string());
+                Log.d("TEST :: ", response.body().toString());
+//                try {
+//                    JSONObject jsonObject = new JSONObject(response.body().toString());
+//                    Log.d("obj0: ",jsonObject.getString("obj0"));
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
             }
         });
     }

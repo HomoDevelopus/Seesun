@@ -7,29 +7,31 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <ImageView
-        android:id="@+id/photo"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:srcCompat="@tools:sample/avatars" />
+        android:orientation="vertical">
+
+        <jy.demo.tesseract.android.CameraPreview
+            android:id="@+id/preview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom" />
+    </LinearLayout>
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <Button
-            android:id="@+id/take"
-            android:layout_width="wrap_content"
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:text="캡처" />
-
-        <Button
-            android:id="@+id/btnImageSend"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="보내기" />
-
+            android:background="#FF9800"
+            android:gravity="center"
+            android:text="Pedestrian Mode"
+            android:textColor="#FFFFFF"
+            android:textSize="24sp" />
     </FrameLayout>
 
 </FrameLayout>
