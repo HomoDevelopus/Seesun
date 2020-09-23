@@ -28,7 +28,7 @@ public class FileUploadUtils {
                 .addFormDataPart("file",file.getName(),RequestBody.create(MultipartBody.FORM,file))
                 .build();
         Request request = new Request.Builder()
-        .url("https://yesor0923.ngrok.io/file_upload")
+        .url("https://yesor.ngrok.io/file_upload")
         .post(requestBody).build();
 
         OkHttpClient client = new OkHttpClient();

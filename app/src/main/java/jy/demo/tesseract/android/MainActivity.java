@@ -46,6 +46,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.Toast;
+
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 
 public class MainActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
@@ -72,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         aManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
@@ -85,6 +89,12 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
         // 안드로이드 6.0 이상 버전에서는 CAMERA 권한 허가를 요청한다.
         requestPermissionCamera();
+
+        // 갤러리 저장하는 권한을 준다.
+        if(Build.VERSION.SDK_INT>22){
+            requestPermissions(new String[] {WRITE_EXTERNAL_STORAGE}, 1);
+        }
+
 
         myShutterCallback = new Camera.ShutterCallback(){
             @Override
@@ -113,9 +123,9 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                             fileOutputStream.flush();
                             fileOutputStream.close();
 
-//                            Toast.makeText(MainActivity.this, // 저장 테스트
-//                                    "Image saved: " + file.toString(),
-//                                    Toast.LENGTH_LONG).show();
+                            Toast.makeText(MainActivity.this, // 저장 테스트
+                                    "Image saved: " + file.toString(),
+                                    Toast.LENGTH_LONG).show();
                         }
                         catch(IOException e){
                             e.printStackTrace();
@@ -158,18 +168,18 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             }
         }).start();
 
-        LinearLayout layout = findViewById(R.id.background);
-        layout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mCamera.autoFocus(new Camera.AutoFocusCallback() {
-                    @Override
-                    public void onAutoFocus(boolean b, Camera camera) {
-
-                    }
-                });
-            }
-        });
+//        LinearLayout layout = findViewById(R.id.background);
+//        layout.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                mCamera.autoFocus(new Camera.AutoFocusCallback() {
+//                    @Override
+//                    public void onAutoFocus(boolean b, Camera camera) {
+//
+//                    }
+//                });
+//            }
+//        });
 
         //mute 요청
         int cameraId = -1;
@@ -195,6 +205,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             aManager.setStreamMute(AudioManager.STREAM_MUSIC, true);
         }
     }
+
 
     public void dataProcessing(ArrayList<JSONObject> detectedObjs) throws JSONException {
         Log.d("<dataprocessing 함수 호출>", "json 데이터 처리");
@@ -275,10 +286,24 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
 
+        System.out.println("****************** on Request Permission"+String.valueOf(requestCode)+" / ");
+//        switch (requestCode) {
+//            case 1: {
+//                if (!(grantResults.length > 0
+//                        && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED)) {
+////                    Toast.makeText(MainActivity.this , Toast.LENGTH_SHORT).show();
+//                    System.out.println("Permission denied to access your location.");
+//                }
+//            }
+//            case 0:
+//
+//        }
+
         if (RESULT_PERMISSIONS == requestCode) {
 
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                System.out.println();
                 // 권한 허가시
                 setInit();
             } else {
