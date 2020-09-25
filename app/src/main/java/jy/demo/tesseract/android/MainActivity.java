@@ -72,7 +72,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         aManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
@@ -87,12 +86,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         // 안드로이드 6.0 이상 버전에서는 CAMERA 권한 허가를 요청한다.
         requestPermissionCamera();
 
-        // 갤러리 저장하는 권한을 준다.
-        if(Build.VERSION.SDK_INT>22){
-            requestPermissions(new String[] {WRITE_EXTERNAL_STORAGE}, 1);
-        }
-
-
         myShutterCallback = new Camera.ShutterCallback(){
             @Override
             public void onShutter() {
@@ -105,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             @Override
             public void onPictureTaken(byte[] arg0, Camera arg1) {
                 if (arg0 != null) {
-                    bitmap = BitmapFactory.decodeByteArray(arg0 , 0, arg0.length);
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(arg0 , 0, arg0 .length);
                     if(bitmap!=null){
                         file = new File(Environment.getExternalStorageDirectory()+"/dirr");
                         if(!file.isDirectory()){
@@ -115,19 +108,16 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         try
                         {
                             FileOutputStream fileOutputStream=new FileOutputStream(file);
-                            bitmap = Bitmap.createScaledBitmap(bitmap, 640, 480, true );
-                            bitmap = GetRotatedBitmap(bitmap, 90);
-
-                            bitmap.compress(Bitmap.CompressFormat.JPEG,50, fileOutputStream);
-
+                            bitmap.compress(Bitmap.CompressFormat.JPEG,100, fileOutputStream);
 
                             fileOutputStream.flush();
                             fileOutputStream.close();
 
-                            Toast.makeText(MainActivity.this, // 저장 테스트
-                                    "Image saved: " + file.toString(),
-                                    Toast.LENGTH_LONG).show();
-                        } catch(Exception e){
+//                            Toast.makeText(MainActivity.this, // 저장 테스트
+//                                    "Image saved: " + file.toString(),
+//                                    Toast.LENGTH_LONG).show();
+                        }
+                        catch(IOException e){
                             e.printStackTrace();
                         }
                         catch(Exception exception)
@@ -148,10 +138,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         Thread.sleep(1000);//1초 간격으로 사진 촬영
                         mCamera.takePicture(myShutterCallback,
                                 myPictureCallback_RAW, myPictureCallback_JPG);
-
-                        while(file==null){}
-
-//                        fu.uploadBitmap(bitmap, MainActivity.this);
+                        Thread.sleep(100);
                         detectedObjs = fu.send2Server(file);
 
                         runOnUiThread(new Runnable() {//UI 변경
@@ -183,32 +170,31 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 });
             }
         });
-    }
 
-    public synchronized static Bitmap GetRotatedBitmap(Bitmap bitmap, int degrees)
-    {
-        if ( degrees != 0 && bitmap != null )
-        {
-            Matrix m = new Matrix();
-            m.setRotate(degrees, (float) bitmap.getWidth() / 2, (float) bitmap.getHeight() / 2 );
-            try
-            {
-                Bitmap b2 = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
-                if (bitmap != b2)
-                {
-                    bitmap.recycle();
-                    bitmap = b2;
-                }
-            }
-            catch (OutOfMemoryError ex)
-            {
-                // We have no memory to rotate. Return the original bitmap.
+        //mute 요청
+        int cameraId = -1;
+        int numberOfCameras = Camera.getNumberOfCameras();
+        for (int i = 0; i < numberOfCameras; i++) {
+            Camera.CameraInfo info = new Camera.CameraInfo();
+            Camera.getCameraInfo(i, info);
+            System.out.println("info.canDisableShutterSound:"+info.canDisableShutterSound);
+            if (info.canDisableShutterSound) {
+                mCamera.enableShutterSound(false);
             }
         }
 
-        return bitmap;
+        // Change the stream to your stream of choice.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            System.out.println("뮤트 in");
+            aManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_MUTE, 0);
+            aManager.adjustStreamVolume(AudioManager.STREAM_NOTIFICATION, AudioManager.ADJUST_MUTE, 0);
+            aManager.adjustStreamVolume(AudioManager.STREAM_ALARM, AudioManager.ADJUST_MUTE, 0);
+            aManager.adjustStreamVolume(AudioManager.STREAM_RING, AudioManager.ADJUST_MUTE, 0);
+            aManager.adjustStreamVolume(AudioManager.STREAM_SYSTEM, AudioManager.ADJUST_MUTE, 0);
+        } else {
+            aManager.setStreamMute(AudioManager.STREAM_MUSIC, true);
+        }
     }
-
 
     public void dataProcessing(ArrayList<JSONObject> detectedObjs) throws JSONException {
         Log.d("<dataprocessing 함수 호출>", "json 데이터 처리");
@@ -289,24 +275,10 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
 
-        System.out.println("****************** on Request Permission"+String.valueOf(requestCode)+" / ");
-//        switch (requestCode) {
-//            case 1: {
-//                if (!(grantResults.length > 0
-//                        && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED)) {
-////                    Toast.makeText(MainActivity.this , Toast.LENGTH_SHORT).show();
-//                    System.out.println("Permission denied to access your location.");
-//                }
-//            }
-//            case 0:
-//
-//        }
-
         if (RESULT_PERMISSIONS == requestCode) {
 
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                System.out.println();
                 // 권한 허가시
                 setInit();
             } else {
