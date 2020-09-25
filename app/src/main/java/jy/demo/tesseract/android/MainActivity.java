@@ -6,12 +6,8 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
-import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.media.AudioManager;
-import android.media.ExifInterface;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
@@ -48,12 +44,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.Toast;
-
-import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 
 public class MainActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
@@ -68,8 +60,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     private Camera.PictureCallback myPictureCallback_RAW;
     private Camera.ShutterCallback myShutterCallback;
     private FileUploadUtils fu; //파일전송/수신 클래스
-    private Bitmap bitmap;
-    
     private ArrayList<JSONObject> detectedObjs;//json data 배열
 
     private TessBaseAPI tessBaseAPI;//tesseract 관련 클래스 객체
@@ -103,7 +93,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         }
 
 
-
         myShutterCallback = new Camera.ShutterCallback(){
             @Override
             public void onShutter() {
@@ -123,7 +112,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                             file.mkdir();
                         }
                         file = new File(Environment.getExternalStorageDirectory()+"/dirr","CAPTURE.jpg");
-
                         try
                         {
                             FileOutputStream fileOutputStream=new FileOutputStream(file);
@@ -142,6 +130,10 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         } catch(Exception e){
                             e.printStackTrace();
                         }
+                        catch(Exception exception)
+                        {
+                            exception.printStackTrace();
+                        }
 
                     }
                 }
@@ -153,9 +145,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             public void run() {
                 while(true) {
                     try {
-
                         Thread.sleep(1000);//1초 간격으로 사진 촬영
-
                         mCamera.takePicture(myShutterCallback,
                                 myPictureCallback_RAW, myPictureCallback_JPG);
 
@@ -163,7 +153,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
 //                        fu.uploadBitmap(bitmap, MainActivity.this);
                         detectedObjs = fu.send2Server(file);
-
 
                         runOnUiThread(new Runnable() {//UI 변경
                             @Override
@@ -220,6 +209,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         return bitmap;
     }
 
+
     public void dataProcessing(ArrayList<JSONObject> detectedObjs) throws JSONException {
         Log.d("<dataprocessing 함수 호출>", "json 데이터 처리");
         ImageView imageView = (ImageView)findViewById(R.id.image_result);
@@ -228,9 +218,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         }
         for(int i=0;i<detectedObjs.size();i++){
             String object = detectedObjs.get(i).get("object").toString();
-            CharSequence obj = object;
-            speakOut(obj);
-            if (object.equals("not found") || object.equals(null)){return;}
             float accuracy = Float.parseFloat(detectedObjs.get(i).get("accuracy").toString());
             float[] location = new float[4];
             String tmp = detectedObjs.get(i).get("location").toString();
@@ -255,12 +242,11 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             imageView.setImageBitmap(resultBitmap); // 이미지 뷰에 비트맵 출력
 
             //tts 음성 안내
-//            float MINACC = 50;
-//            if(accuracy >= MINACC){
-            System.out.println(object);
-//                CharSequence obj = object;
-//                speakOut(obj);
-//            }
+            float MINACC = 50;
+            if(accuracy >= MINACC){
+                CharSequence obj = object;
+                speakOut(obj);
+            }
         }
     }
 
@@ -302,6 +288,20 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
+
+        System.out.println("****************** on Request Permission"+String.valueOf(requestCode)+" / ");
+//        switch (requestCode) {
+//            case 1: {
+//                if (!(grantResults.length > 0
+//                        && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED)) {
+////                    Toast.makeText(MainActivity.this , Toast.LENGTH_SHORT).show();
+//                    System.out.println("Permission denied to access your location.");
+//                }
+//            }
+//            case 0:
+//
+//        }
+
         if (RESULT_PERMISSIONS == requestCode) {
 
             if (grantResults.length > 0
@@ -324,9 +324,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     private void speakOut(CharSequence text){
         tts.setPitch((float) 0.6);
 //        tts.setSpeechRate((float)0.1);
-        Bundle params = new Bundle();
-        params.putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, 0.5f);
-        tts.speak(text, TextToSpeech.QUEUE_FLUSH,params,"id1");
+        tts.speak(text, TextToSpeech.QUEUE_FLUSH,null,"id1");
     }
     @Override
     public void onDestroy() {
