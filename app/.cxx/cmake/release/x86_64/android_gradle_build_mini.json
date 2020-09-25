@@ -1,0 +1,20 @@
+{
+  "buildFiles": [
+    "C:\\Users\\sor\\AppData\\Local\\Android\\Sdk\\ndk\\21.3.6528147\\build\\cmake\\platforms.cmake",
+    "C:\\Users\\sor\\AppData\\Local\\Android\\Sdk\\ndk\\21.3.6528147\\build\\cmake\\android.toolchain.cmake",
+    "C:\\Users\\sor\\Desktop\\Study\\python\\seesun\\SeesunAndroid\\app\\src\\main\\cpp\\CMakeLists.txt"
+  ],
+  "cleanCommands": [
+    "C:\\Users\\sor\\AppData\\Local\\Android\\Sdk\\cmake\\3.10.2.4988404\\bin\\ninja.exe -C \"C:\\Users\\sor\\Desktop\\Study\\python\\seesun\\SeesunAndroid\\app\\.cxx\\cmake\\release\\x86_64\" clean"
+  ],
+  "buildTargetsCommand": "C:\\Users\\sor\\AppData\\Local\\Android\\Sdk\\cmake\\3.10.2.4988404\\bin\\ninja.exe  -C \"C:\\Users\\sor\\Desktop\\Study\\python\\seesun\\SeesunAndroid\\app\\.cxx\\cmake\\release\\x86_64\" {LIST_OF_TARGETS_TO_BUILD}",
+  "libraries": {
+    "native-lib-Release-x86_64": {
+      "artifactName": "native-lib",
+      "buildCommand": "C:\\Users\\sor\\AppData\\Local\\Android\\Sdk\\cmake\\3.10.2.4988404\\bin\\ninja.exe -C \"C:\\Users\\sor\\Desktop\\Study\\python\\seesun\\SeesunAndroid\\app\\.cxx\\cmake\\release\\x86_64\" native-lib",
+      "abi": "x86_64",
+      "output": "C:\\Users\\sor\\Desktop\\Study\\python\\seesun\\SeesunAndroid\\app\\build\\intermediates\\cmake\\release\\obj\\x86_64\\libnative-lib.so",
+      "runtimeFiles": []
+    }
+  }
+}

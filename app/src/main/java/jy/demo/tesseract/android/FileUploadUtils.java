@@ -28,8 +28,8 @@ public class FileUploadUtils {
                 .addFormDataPart("file",file.getName(),RequestBody.create(MultipartBody.FORM,file))
                 .build();
         Request request = new Request.Builder()
-        .url("https://yesor0923.ngrok.io/file_upload")
-        .post(requestBody).build();
+                .url("https://yesor.ngrok.io/file_upload")
+                .post(requestBody).build();
 
         OkHttpClient client = new OkHttpClient();
         client.newCall(request).enqueue(new Callback() {
@@ -59,6 +59,51 @@ public class FileUploadUtils {
                 }
             }
         });
+
+        //
+//    public void uploadBitmap(final Bitmap bitmap, final Context context) {
+//
+//        VolleyMultipartRequest volleyMultipartRequest = new VolleyMultipartRequest(Request.Method.POST, "https://yesor.ngrok.io/file_upload",
+//                new Response.Listener<NetworkResponse>() {
+//                    @Override
+//                    public void onResponse(NetworkResponse response) {
+//                        try {
+//                            JSONObject obj = new JSONObject(new String(response.data));
+//                            Toast.makeText(context, obj.getString("message"), Toast.LENGTH_SHORT).show();
+//                        } catch (JSONException e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                },
+//                new Response.ErrorListener() {
+//                    @Override
+//                    public void onErrorResponse(VolleyError error) {
+//                        Toast.makeText(context, error.getMessage(), Toast.LENGTH_LONG).show();
+//                        Log.e("GotError",""+error.getMessage());
+//                    }
+//                }) {
+//
+//
+//            @Override
+//            protected Map<String, DataPart> getByteData() {
+//                Map<String, DataPart> params = new HashMap<>();
+//                long imagename = System.currentTimeMillis();
+//                params.put("image", new DataPart(imagename + ".png", getFileDataFromDrawable(bitmap)));
+//                return params;
+//            }
+//
+//            public byte[] getFileDataFromDrawable(Bitmap bitmap) {
+//                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+//                bitmap.compress(Bitmap.CompressFormat.PNG, 80, byteArrayOutputStream);
+//                return byteArrayOutputStream.toByteArray();
+//            }
+//        };
+//
+//
+//
+//        //adding the request to volley
+//        Volley.newRequestQueue(context).add(volleyMultipartRequest);
+//    }
         return detectedObjs;
     }
 }

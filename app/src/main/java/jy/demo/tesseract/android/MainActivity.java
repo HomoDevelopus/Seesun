@@ -6,8 +6,12 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.media.AudioManager;
+import android.media.ExifInterface;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
@@ -44,8 +48,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.Toast;
+
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 
 public class MainActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
@@ -60,6 +68,8 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     private Camera.PictureCallback myPictureCallback_RAW;
     private Camera.ShutterCallback myShutterCallback;
     private FileUploadUtils fu; //파일전송/수신 클래스
+    private Bitmap bitmap;
+    
     private ArrayList<JSONObject> detectedObjs;//json data 배열
 
     private TessBaseAPI tessBaseAPI;//tesseract 관련 클래스 객체
@@ -72,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         aManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
@@ -86,6 +97,13 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         // 안드로이드 6.0 이상 버전에서는 CAMERA 권한 허가를 요청한다.
         requestPermissionCamera();
 
+        // 갤러리 저장하는 권한을 준다.
+        if(Build.VERSION.SDK_INT>22){
+            requestPermissions(new String[] {WRITE_EXTERNAL_STORAGE}, 1);
+        }
+
+
+
         myShutterCallback = new Camera.ShutterCallback(){
             @Override
             public void onShutter() {
@@ -98,31 +116,31 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             @Override
             public void onPictureTaken(byte[] arg0, Camera arg1) {
                 if (arg0 != null) {
-                    Bitmap bitmap = BitmapFactory.decodeByteArray(arg0 , 0, arg0 .length);
+                    bitmap = BitmapFactory.decodeByteArray(arg0 , 0, arg0.length);
                     if(bitmap!=null){
                         file = new File(Environment.getExternalStorageDirectory()+"/dirr");
                         if(!file.isDirectory()){
                             file.mkdir();
                         }
                         file = new File(Environment.getExternalStorageDirectory()+"/dirr","CAPTURE.jpg");
+
                         try
                         {
                             FileOutputStream fileOutputStream=new FileOutputStream(file);
-                            bitmap.compress(Bitmap.CompressFormat.JPEG,100, fileOutputStream);
+                            bitmap = Bitmap.createScaledBitmap(bitmap, 640, 480, true );
+                            bitmap = GetRotatedBitmap(bitmap, 90);
+
+                            bitmap.compress(Bitmap.CompressFormat.JPEG,50, fileOutputStream);
+
 
                             fileOutputStream.flush();
                             fileOutputStream.close();
 
-//                            Toast.makeText(MainActivity.this, // 저장 테스트
-//                                    "Image saved: " + file.toString(),
-//                                    Toast.LENGTH_LONG).show();
-                        }
-                        catch(IOException e){
+                            Toast.makeText(MainActivity.this, // 저장 테스트
+                                    "Image saved: " + file.toString(),
+                                    Toast.LENGTH_LONG).show();
+                        } catch(Exception e){
                             e.printStackTrace();
-                        }
-                        catch(Exception exception)
-                        {
-                            exception.printStackTrace();
                         }
 
                     }
@@ -135,11 +153,17 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             public void run() {
                 while(true) {
                     try {
+
                         Thread.sleep(1000);//1초 간격으로 사진 촬영
+
                         mCamera.takePicture(myShutterCallback,
                                 myPictureCallback_RAW, myPictureCallback_JPG);
-                        Thread.sleep(100);
+
+                        while(file==null){}
+
+//                        fu.uploadBitmap(bitmap, MainActivity.this);
                         detectedObjs = fu.send2Server(file);
+
 
                         runOnUiThread(new Runnable() {//UI 변경
                             @Override
@@ -170,30 +194,30 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 });
             }
         });
+    }
 
-        //mute 요청
-        int cameraId = -1;
-        int numberOfCameras = Camera.getNumberOfCameras();
-        for (int i = 0; i < numberOfCameras; i++) {
-            Camera.CameraInfo info = new Camera.CameraInfo();
-            Camera.getCameraInfo(i, info);
-            System.out.println("info.canDisableShutterSound:"+info.canDisableShutterSound);
-            if (info.canDisableShutterSound) {
-                mCamera.enableShutterSound(false);
+    public synchronized static Bitmap GetRotatedBitmap(Bitmap bitmap, int degrees)
+    {
+        if ( degrees != 0 && bitmap != null )
+        {
+            Matrix m = new Matrix();
+            m.setRotate(degrees, (float) bitmap.getWidth() / 2, (float) bitmap.getHeight() / 2 );
+            try
+            {
+                Bitmap b2 = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
+                if (bitmap != b2)
+                {
+                    bitmap.recycle();
+                    bitmap = b2;
+                }
+            }
+            catch (OutOfMemoryError ex)
+            {
+                // We have no memory to rotate. Return the original bitmap.
             }
         }
 
-        // Change the stream to your stream of choice.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-            System.out.println("뮤트 in");
-            aManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_MUTE, 0);
-            aManager.adjustStreamVolume(AudioManager.STREAM_NOTIFICATION, AudioManager.ADJUST_MUTE, 0);
-            aManager.adjustStreamVolume(AudioManager.STREAM_ALARM, AudioManager.ADJUST_MUTE, 0);
-            aManager.adjustStreamVolume(AudioManager.STREAM_RING, AudioManager.ADJUST_MUTE, 0);
-            aManager.adjustStreamVolume(AudioManager.STREAM_SYSTEM, AudioManager.ADJUST_MUTE, 0);
-        } else {
-            aManager.setStreamMute(AudioManager.STREAM_MUSIC, true);
-        }
+        return bitmap;
     }
 
     public void dataProcessing(ArrayList<JSONObject> detectedObjs) throws JSONException {
@@ -204,6 +228,9 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         }
         for(int i=0;i<detectedObjs.size();i++){
             String object = detectedObjs.get(i).get("object").toString();
+            CharSequence obj = object;
+            speakOut(obj);
+            if (object.equals("not found") || object.equals(null)){return;}
             float accuracy = Float.parseFloat(detectedObjs.get(i).get("accuracy").toString());
             float[] location = new float[4];
             String tmp = detectedObjs.get(i).get("location").toString();
@@ -228,11 +255,12 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             imageView.setImageBitmap(resultBitmap); // 이미지 뷰에 비트맵 출력
 
             //tts 음성 안내
-            float MINACC = 50;
-            if(accuracy >= MINACC){
-                CharSequence obj = object;
-                speakOut(obj);
-            }
+//            float MINACC = 50;
+//            if(accuracy >= MINACC){
+            System.out.println(object);
+//                CharSequence obj = object;
+//                speakOut(obj);
+//            }
         }
     }
 
@@ -274,11 +302,11 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
-
         if (RESULT_PERMISSIONS == requestCode) {
 
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                System.out.println();
                 // 권한 허가시
                 setInit();
             } else {
@@ -296,7 +324,9 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     private void speakOut(CharSequence text){
         tts.setPitch((float) 0.6);
 //        tts.setSpeechRate((float)0.1);
-        tts.speak(text, TextToSpeech.QUEUE_FLUSH,null,"id1");
+        Bundle params = new Bundle();
+        params.putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, 0.5f);
+        tts.speak(text, TextToSpeech.QUEUE_FLUSH,params,"id1");
     }
     @Override
     public void onDestroy() {
