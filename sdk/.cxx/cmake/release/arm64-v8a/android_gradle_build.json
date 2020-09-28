@@ -1,39 +1,39 @@
 {
   "stringTable": {
-    "0": "C:/Users/sor/Desktop/Study/python/seesun/SeesunAndroid/sdk/.cxx/cmake/release/arm64-v8a",
-    "1": "--target=aarch64-none-linux-android21 --gcc-toolchain=C:/Users/sor/AppData/Local/Android/Sdk/ndk/21.3.6528147/toolchains/llvm/prebuilt/windows-x86_64 --sysroot=C:/Users/sor/AppData/Local/Android/Sdk/ndk/21.3.6528147/toolchains/llvm/prebuilt/windows-x86_64/sysroot -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security -O2 -DNDEBUG -fPIC"
+    "0": "C:/Users/anyej/Documents/GIT/Seesun/sdk/.cxx/cmake/release/arm64-v8a",
+    "1": "--target=aarch64-none-linux-android21 --gcc-toolchain=C:/Users/anyej/AppData/Local/Android/Sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/windows-x86_64 --sysroot=C:/Users/anyej/AppData/Local/Android/Sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/windows-x86_64/sysroot -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security -O2 -DNDEBUG -fPIC"
   },
   "buildFiles": [
-    "C:\\Users\\sor\\AppData\\Local\\Android\\Sdk\\ndk\\21.3.6528147\\build\\cmake\\platforms.cmake",
-    "C:\\Users\\sor\\AppData\\Local\\Android\\Sdk\\ndk\\21.3.6528147\\build\\cmake\\android.toolchain.cmake",
-    "C:\\Users\\sor\\Desktop\\Study\\python\\seesun\\SeesunAndroid\\sdk\\libcxx_helper\\CMakeLists.txt"
+    "C:\\Users\\anyej\\AppData\\Local\\Android\\Sdk\\ndk\\21.1.6352462\\build\\cmake\\platforms.cmake",
+    "C:\\Users\\anyej\\AppData\\Local\\Android\\Sdk\\ndk\\21.1.6352462\\build\\cmake\\android.toolchain.cmake",
+    "C:\\Users\\anyej\\Documents\\GIT\\Seesun\\sdk\\libcxx_helper\\CMakeLists.txt"
   ],
   "cleanCommands": [
-    "C:\\Users\\sor\\AppData\\Local\\Android\\Sdk\\cmake\\3.10.2.4988404\\bin\\ninja.exe -C \"C:\\Users\\sor\\Desktop\\Study\\python\\seesun\\SeesunAndroid\\sdk\\.cxx\\cmake\\release\\arm64-v8a\" clean"
+    "C:\\Users\\anyej\\AppData\\Local\\Android\\Sdk\\cmake\\3.10.2.4988404\\bin\\ninja.exe -C \"C:\\Users\\anyej\\Documents\\GIT\\Seesun\\sdk\\.cxx\\cmake\\release\\arm64-v8a\" clean"
   ],
-  "buildTargetsCommand": "C:\\Users\\sor\\AppData\\Local\\Android\\Sdk\\cmake\\3.10.2.4988404\\bin\\ninja.exe  -C \"C:\\Users\\sor\\Desktop\\Study\\python\\seesun\\SeesunAndroid\\sdk\\.cxx\\cmake\\release\\arm64-v8a\" {LIST_OF_TARGETS_TO_BUILD}",
+  "buildTargetsCommand": "C:\\Users\\anyej\\AppData\\Local\\Android\\Sdk\\cmake\\3.10.2.4988404\\bin\\ninja.exe  -C \"C:\\Users\\anyej\\Documents\\GIT\\Seesun\\sdk\\.cxx\\cmake\\release\\arm64-v8a\" {LIST_OF_TARGETS_TO_BUILD}",
   "libraries": {
     "opencv_jni_shared-Release-arm64-v8a": {
-      "buildCommand": "C:\\Users\\sor\\AppData\\Local\\Android\\Sdk\\cmake\\3.10.2.4988404\\bin\\ninja.exe -C \"C:\\Users\\sor\\Desktop\\Study\\python\\seesun\\SeesunAndroid\\sdk\\.cxx\\cmake\\release\\arm64-v8a\" opencv_jni_shared",
+      "buildCommand": "C:\\Users\\anyej\\AppData\\Local\\Android\\Sdk\\cmake\\3.10.2.4988404\\bin\\ninja.exe -C \"C:\\Users\\anyej\\Documents\\GIT\\Seesun\\sdk\\.cxx\\cmake\\release\\arm64-v8a\" opencv_jni_shared",
       "buildType": "release",
-      "toolchain": "628210205",
+      "toolchain": "114459635",
       "abi": "arm64-v8a",
       "artifactName": "opencv_jni_shared",
       "files": [
         {
-          "src": "C:\\Users\\sor\\Desktop\\Study\\python\\seesun\\SeesunAndroid\\sdk\\libcxx_helper\\dummy.cpp",
+          "src": "C:\\Users\\anyej\\Documents\\GIT\\Seesun\\sdk\\libcxx_helper\\dummy.cpp",
           "flagsOrdinal": 1,
           "workingDirectoryOrdinal": 0
         }
       ],
       "headers": [],
-      "output": "C:\\Users\\sor\\Desktop\\Study\\python\\seesun\\SeesunAndroid\\sdk\\.cxx\\cmake\\release\\arm64-v8a\\libopencv_jni_shared.a",
+      "output": "C:\\Users\\anyej\\Documents\\GIT\\Seesun\\sdk\\.cxx\\cmake\\release\\arm64-v8a\\libopencv_jni_shared.a",
       "runtimeFiles": []
     }
   },
   "toolchains": {
-    "628210205": {
-      "cppCompilerExecutable": "C:\\Users\\sor\\AppData\\Local\\Android\\Sdk\\ndk\\21.3.6528147\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang++.exe"
+    "114459635": {
+      "cppCompilerExecutable": "C:\\Users\\anyej\\AppData\\Local\\Android\\Sdk\\ndk\\21.1.6352462\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang++.exe"
     }
   },
   "cFileExtensions": [],

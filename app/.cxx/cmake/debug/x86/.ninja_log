@@ -1,0 +1,24 @@
+# ninja log v5
+0	37	0	clean	8b9dcfa9727c6594
+0	44	0	clean	8b9dcfa9727c6594
+1	875	622926040	CMakeFiles/native-lib.dir/native-lib.cpp.o	669f8fe625a3d3ba
+878	1434	622926040	C:/Users/anyej/Documents/GIT/Seesun/app/build/intermediates/cmake/debug/obj/x86/libnative-lib.so	cd2a065e911c560
+0	42	0	clean	8b9dcfa9727c6594
+1	40	0	clean	8b9dcfa9727c6594
+9	1311	622926944	CMakeFiles/native-lib.dir/native-lib.cpp.o	669f8fe625a3d3ba
+1312	1915	622926944	C:/Users/anyej/Documents/GIT/Seesun/app/build/intermediates/cmake/debug/obj/x86/libnative-lib.so	cd2a065e911c560
+0	49	0	clean	8b9dcfa9727c6594
+4	1037	622927045	CMakeFiles/native-lib.dir/native-lib.cpp.o	669f8fe625a3d3ba
+1038	1529	622927045	C:/Users/anyej/Documents/GIT/Seesun/app/build/intermediates/cmake/debug/obj/x86/libnative-lib.so	cd2a065e911c560
+0	62	0	clean	8b9dcfa9727c6594
+1	31	0	clean	8b9dcfa9727c6594
+12	1408	622928202	CMakeFiles/native-lib.dir/native-lib.cpp.o	669f8fe625a3d3ba
+1409	2037	622928203	C:/Users/anyej/Documents/GIT/Seesun/app/build/intermediates/cmake/debug/obj/x86/libnative-lib.so	cd2a065e911c560
+0	27	0	clean	8b9dcfa9727c6594
+1	25	0	clean	8b9dcfa9727c6594
+6	993	622929130	CMakeFiles/native-lib.dir/native-lib.cpp.o	669f8fe625a3d3ba
+994	1430	622929130	C:/Users/anyej/Documents/GIT/Seesun/app/build/intermediates/cmake/debug/obj/x86/libnative-lib.so	cd2a065e911c560
+0	34	0	clean	8b9dcfa9727c6594
+0	23	0	clean	8b9dcfa9727c6594
+9	1045	622991756	CMakeFiles/native-lib.dir/native-lib.cpp.o	669f8fe625a3d3ba
+1046	1489	622991757	C:/Users/anyej/Documents/GIT/Seesun/app/build/intermediates/cmake/debug/obj/x86/libnative-lib.so	cd2a065e911c560

@@ -1,0 +1,24 @@
+# ninja log v5
+0	46	0	clean	8b9dcfa9727c6594
+0	40	0	clean	8b9dcfa9727c6594
+1	1144	622926036	CMakeFiles/native-lib.dir/native-lib.cpp.o	e548c3d7caa5043a
+1148	1692	622926037	C:/Users/anyej/Documents/GIT/Seesun/app/build/intermediates/cmake/debug/obj/armeabi-v7a/libnative-lib.so	c5bdd4d57b6a640b
+1	39	0	clean	8b9dcfa9727c6594
+0	41	0	clean	8b9dcfa9727c6594
+18	1731	622926940	CMakeFiles/native-lib.dir/native-lib.cpp.o	e548c3d7caa5043a
+1731	2311	622926940	C:/Users/anyej/Documents/GIT/Seesun/app/build/intermediates/cmake/debug/obj/armeabi-v7a/libnative-lib.so	c5bdd4d57b6a640b
+0	45	0	clean	8b9dcfa9727c6594
+39	1214	622927042	CMakeFiles/native-lib.dir/native-lib.cpp.o	e548c3d7caa5043a
+1214	1692	622927042	C:/Users/anyej/Documents/GIT/Seesun/app/build/intermediates/cmake/debug/obj/armeabi-v7a/libnative-lib.so	c5bdd4d57b6a640b
+0	64	0	clean	8b9dcfa9727c6594
+0	32	0	clean	8b9dcfa9727c6594
+63	2098	622928198	CMakeFiles/native-lib.dir/native-lib.cpp.o	e548c3d7caa5043a
+2099	2624	622928199	C:/Users/anyej/Documents/GIT/Seesun/app/build/intermediates/cmake/debug/obj/armeabi-v7a/libnative-lib.so	c5bdd4d57b6a640b
+1	35	0	clean	8b9dcfa9727c6594
+1	29	0	clean	8b9dcfa9727c6594
+36	1148	622929126	CMakeFiles/native-lib.dir/native-lib.cpp.o	e548c3d7caa5043a
+1149	1749	622929127	C:/Users/anyej/Documents/GIT/Seesun/app/build/intermediates/cmake/debug/obj/armeabi-v7a/libnative-lib.so	c5bdd4d57b6a640b
+1	36	0	clean	8b9dcfa9727c6594
+1	30	0	clean	8b9dcfa9727c6594
+23	1218	622991753	CMakeFiles/native-lib.dir/native-lib.cpp.o	e548c3d7caa5043a
+1219	1771	622991753	C:/Users/anyej/Documents/GIT/Seesun/app/build/intermediates/cmake/debug/obj/armeabi-v7a/libnative-lib.so	c5bdd4d57b6a640b

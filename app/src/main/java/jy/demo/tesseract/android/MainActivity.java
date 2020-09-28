@@ -46,10 +46,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
 import android.view.ViewGroup.LayoutParams;
-
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
-
     private File file; //캡처한 이미지
     private static CameraPreview surfaceView;
     private SurfaceHolder holder;
@@ -65,16 +64,13 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     private TessBaseAPI tessBaseAPI;//tesseract 관련 클래스 객체
 
     private TextToSpeech tts;
+    private Bitmap bitmap;
 
-    AudioManager aManager;
-    SharedPreferences sharedPreferences;
-    SharedPreferences.Editor editor;
+//    private CrossThread crossTh;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        aManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-
         fu = new FileUploadUtils();
         tts = new TextToSpeech(this, this);
 
@@ -130,6 +126,10 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             }
         };
 
+        //
+//        crossTh = new CrossThread();
+//        crossTh.start();    // 횡단보도 감시 스레드 시작
+
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -139,6 +139,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         mCamera.takePicture(myShutterCallback,
                                 myPictureCallback_RAW, myPictureCallback_JPG);
                         Thread.sleep(100);
+                        while(file==null){}
                         detectedObjs = fu.send2Server(file);
 
                         runOnUiThread(new Runnable() {//UI 변경
@@ -170,30 +171,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                 });
             }
         });
-
-        //mute 요청
-        int cameraId = -1;
-        int numberOfCameras = Camera.getNumberOfCameras();
-        for (int i = 0; i < numberOfCameras; i++) {
-            Camera.CameraInfo info = new Camera.CameraInfo();
-            Camera.getCameraInfo(i, info);
-            System.out.println("info.canDisableShutterSound:"+info.canDisableShutterSound);
-            if (info.canDisableShutterSound) {
-                mCamera.enableShutterSound(false);
-            }
-        }
-
-        // Change the stream to your stream of choice.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-            System.out.println("뮤트 in");
-            aManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_MUTE, 0);
-            aManager.adjustStreamVolume(AudioManager.STREAM_NOTIFICATION, AudioManager.ADJUST_MUTE, 0);
-            aManager.adjustStreamVolume(AudioManager.STREAM_ALARM, AudioManager.ADJUST_MUTE, 0);
-            aManager.adjustStreamVolume(AudioManager.STREAM_RING, AudioManager.ADJUST_MUTE, 0);
-            aManager.adjustStreamVolume(AudioManager.STREAM_SYSTEM, AudioManager.ADJUST_MUTE, 0);
-        } else {
-            aManager.setStreamMute(AudioManager.STREAM_MUSIC, true);
-        }
     }
 
     public void dataProcessing(ArrayList<JSONObject> detectedObjs) throws JSONException {
@@ -210,6 +187,12 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             for(int j = 0; j < 4 ; j++){
                 location[j] = Float.parseFloat(tmp.substring(1,tmp.length()-1).split(",")[j]);
             }
+
+            //추가
+//            if (object.equals("cross walk") && accuracy >= 20.0){   // 횡단보도 이면서 50퍼이상의 정확도
+////            if (object.equals("cross walk") && accuracy >= 50.0){   // 횡단보도 이면서 50퍼이상의 정확도
+//                crossTh.findCrosswalk(System.currentTimeMillis());
+//            }
 
             //이미지 뷰에 띄우기
             Bitmap myBitmap = BitmapFactory.decodeFile(file.getAbsolutePath()); // 비트맵 생성
@@ -228,11 +211,9 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             imageView.setImageBitmap(resultBitmap); // 이미지 뷰에 비트맵 출력
 
             //tts 음성 안내
-            float MINACC = 50;
-            if(accuracy >= MINACC){
-                CharSequence obj = object;
-                speakOut(obj);
-            }
+            CharSequence obj = object;
+            System.out.println("obj:"+obj);
+            speakOut(obj);
         }
     }
 
@@ -281,10 +262,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // 권한 허가시
                 setInit();
-            } else {
-                // 권한 거부시
             }
-            return;
         }
     }
 
@@ -294,7 +272,8 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void speakOut(CharSequence text){
-        tts.setPitch((float) 0.6);
+        System.out.println("speakout 진입");
+        tts.setPitch((float) 1.0);
 //        tts.setSpeechRate((float)0.1);
         tts.speak(text, TextToSpeech.QUEUE_FLUSH,null,"id1");
     }
