@@ -1,2 +1,2 @@
-# android-camerax-java
-A simple demo tutorial of the implementation of Android CameraX with Java
+# 시선 프로젝트
+시각장애인의 안전한 보행을 위한 딥러닝 이미지 인식 음성안내 어플리케이션
