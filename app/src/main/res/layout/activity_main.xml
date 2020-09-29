@@ -35,23 +35,12 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/previewView">
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/capture"
-            android:layout_width="0dp"
+        <Button
+            android:id="@+id/kiosk"
+            android:layout_width="3dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            app:cardBackgroundColor="#ffffff"
-            app:cardCornerRadius="18dp">
-
-            <ImageView
-                android:id="@+id/captureImg"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:contentDescription="@string/capture"
-                android:src="@mipmap/ic_capture" />
-
-        </androidx.cardview.widget.CardView>
-
+            android:text="Kiosk" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
